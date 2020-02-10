@@ -31,7 +31,7 @@ function renoldsnum(rho,v,D,mu)
     return rho*v*D/mu
 end
 #
-function basic_pipe(Hn, Vdotn; method="Bier",theta=45,H=700,eta_nominal=0.9,pipe_roughness=0.05,unit="penstock")
+function basic_pipe(Hn, Vdotn; method="Bier",theta=45.,H=700.,eta_nominal=0.9,pipe_roughness=0.05,unit="penstock")
     g,rho,mu=parameters()
     P = eta_nominal*rho*g*Vdotn*Hn/1000;
     D = nominal_diameter(method,P,Hn,Vdotn)
