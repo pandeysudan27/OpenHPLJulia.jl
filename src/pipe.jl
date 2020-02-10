@@ -19,7 +19,7 @@ function nominal_diameter(method,P,Hn,Vdotn)
         elseif method == "Fahlbusch"
             D = 1.12*Vdotn^0.45/Hn^0.12
         end
-    return D
+    return D*1.5
 end
 # for darcys friction factor Sami and Jain
 function f_Darcy(NRe, pipe_roughness,D)
@@ -30,34 +30,8 @@ end
 function renoldsnum(rho,v,D,mu)
     return rho*v*D/mu
 end
-# for basic elements
-function unit_type(unit,Hn)
-    if unit == "intake"
-        hL = 0.03*Hn
-    elseif unit == "surgetank"
-        hL = 0.03*Hn
-    elseif unit == "penstock"
-        hL = 0.1*Hn
-    elseif unit == "pipe"
-        hL = 0.03*Hn
-    end
-    return hL
-end
 #
-function inclination_angle(unit,hL,L,g,D,v)
-    if unit == "intake"
-        alpha = 10.
-    elseif unit == "surgetank"
-        alpha = 90.
-    elseif unit == "penstock"
-        alpha = 40#rad2deg(asin((0.0576*(v/sqrt(g*D))-hL/L-0.1295))/0.0665)
-    elseif unit == "pipe"
-        alpha = 10.
-    end
-    return alpha
-end
-#
-function basic_pipe(Hn, Vdotn; method="Bier",eta_nominal=0.9,pipe_roughness=0.05,unit = "penstock")
+function basic_pipe(Hn, Vdotn; method="Bier",theta=45,H=700,eta_nominal=0.9,pipe_roughness=0.05,unit="penstock")
     g,rho,mu=parameters()
     P = eta_nominal*rho*g*Vdotn*Hn/1000;
     D = nominal_diameter(method,P,Hn,Vdotn)
@@ -65,11 +39,10 @@ function basic_pipe(Hn, Vdotn; method="Bier",eta_nominal=0.9,pipe_roughness=0.05
     v = Vdotn/A
     NRe = renoldsnum(rho,v,D,mu)
     f = f_Darcy(NRe, pipe_roughness,D)
-    hL = unit_type(unit,Hn)
-    L = (2*g*hL*D)/(f*v^2)
-    hGrad = hL/L
-    alpha = inclination_angle(unit,hL,L,g,D,v)
-    H = abs(L*sin(deg2rad(alpha)))
+    L = H/sind(theta)
+    hL = f*L*v^2/(2*g*D)
+    hGrad = hL/sqrt(L^2-H^2)
+    gradAngle = atan(hGrad)
     return sort((Dict("a. Nominal head"=>Hn,
                 "b. Nominal dischare"=>Vdotn,
                 "c. Nominal hydraulic efficiency"=>eta_nominal,
@@ -79,12 +52,12 @@ function basic_pipe(Hn, Vdotn; method="Bier",eta_nominal=0.9,pipe_roughness=0.05
                 "g. Height"=>H,
                 "h. Length"=>L,
                 "i. Hydraulic crosssection"=>A,
-                "j. Angle of inclination"=>alpha,
+                "j. Angle of inclination"=>theta,
                 "k. Average velocity"=>v,
                 "l. Nominal Reynolds number"=>NRe,
                 "m. Darcy's friction factor"=>f,
                 "n. Nominal allowed head loss"=>hL,
-                "n. Hydraulic gradient"=>hGrad,
-                "o. Pipe roughness"=>pipe_roughness,
-                "p. Kinematic viscocity of water"=>mu)))
+                "o. Hydraulic gradient"=>hGrad,
+                "p. Pipe roughness"=>pipe_roughness,
+                "q. Gradient angle"=>gradAngle)))
 end
