@@ -36,7 +36,7 @@ function headraceNsurgetank(Hn, Vdotn, H, theta, Hns; method="Bier",eta_nominal=
     # surge tank depends on headrace tunnel so
     n = 1.6 # safety factor for Thoma criteria
     # Acessing data of headrace tunnel from dictionary
-    Dt,Lt,At,ft,vt = headrace_dict["f. Economical diameter","i. Length","g. Cross-section","n. Darcy's friction factor","l. Average velocity"]
+    Dt,Lt,At,ft,vt = headrace_dict["f. Economical diameter"],headrace_dict["i. Length"],headrace_dict["g. Cross-section"],headrace_dict["n. Darcy's friction factor"],headrace_dict["l. Average velocity"]
     # calculating headrace tunnel friction factor
     beta = ft*Lt/(2*g*Dt)
     As = n*(Lt*At)/(2*g*beta*(Hn-beta*vt^2))
@@ -44,10 +44,13 @@ function headraceNsurgetank(Hn, Vdotn, H, theta, Hns; method="Bier",eta_nominal=
     Ymax = vt*sqrt((Lt*At)/(g*As))
     Hs = 1.2*(Hns+Ymax)
     vs = Vdotn/As
-    sugretank_dict = sort((Dict("s. Diameter of surge tank"=>Ds,
+    surgetank_dict = sort((Dict("s. Diameter of surge tank"=>Ds,
                     "t. Cross-section of surge tank"=>As,
                     "u. Maximum height of water oscillation"=>Hns+Ymax,
                     "v. Height of surge tank"=>Hs,
                     "w. Allowed velocity of water inside surge tank"=>vs)))
     return sort(merge(headrace_dict,surgetank_dict))
+end
+function f2x1y(x,y)
+    return 2*x+1*y
 end
